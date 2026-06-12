@@ -1,1 +1,632 @@
-CASPER 2026
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CASPER: Task Command Repair with Constrained Preference Learning</title>
+  <meta name="description" content="CASPER — A constrained repair framework that transforms defective robot commands into safe alternatives and learns personalized repair preferences.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Castoro:ital@0;1&family=Noto+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ============================================================= -->
+  <!-- HERO -->
+  <!-- ============================================================= -->
+  <section class="hero" id="home">
+    <div class="container">
+      <span class="venue-badge">Under Review 2026</span>
+      <h1><span style="color: var(--accent);">CASPER</span>: Task Command Repair with Constrained Preference Learning</h1>
+      <p class="subtitle">
+        A constrained repair framework that transforms defective robot commands into safe,
+        robot-executable alternatives and learns personalized repair preferences.
+      </p>
+      <p class="authors">Anonymous Authors</p>
+
+      <div class="btn-row">
+        <a href="trace_backend.html" class="btn btn-dark" target="_blank">Execution Backend Trace</a>
+        <a href="#results" class="btn btn-dark">Results</a>
+        <a href="casper_code.zip" class="btn btn-dark" download>Code</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================= -->
+  <!-- ABSTRACT -->
+  <!-- ============================================================= -->
+  <section id="abstract" class="section-compact">
+    <div class="container">
+      <h2 class="section-title-only">Abstract</h2>
+      <p>
+        Pre-execution safety gates have emerged as the first safety layer for LLM-based robot systems,
+        ensuring that only safe task commands proceed to task planning and policy execution.
+        However, current safety gates focus only on accepting or denying commands and do not
+        provide users with opportunity to recover from errors, or adapt to individual users
+        over time.
+        We present CASPER, a constrained repair framework that transforms recoverable defective robot
+        commands into safe, robot-executable alternatives, and learns personalized repair preferences
+        over the resulting safe set.
+        We evaluate CASPER on external benchmarks, real-world robot experiments, qualitative mechanistic
+        analysis, and preference learning cross-transfer experiments. Across these settings, CASPER
+        achieves high detection rate of unsafe commands and learns repair preferences in fewer
+        interactions.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================= -->
+  <!-- VIDEO -->
+  <!-- ============================================================= -->
+  <section id="video">
+    <div class="container">
+      <div class="section-header">
+        <span class="label">Video</span>
+        <h2>Real-World Robot Demonstration</h2>
+      </div>
+      <p>
+        This video shows CASPER operating on a Franka Research 3 robot. The system detects defective commands,
+        generates safe repairs using operator-conditioned generation, validates them through a
+        three-gate waterfall, and selects repairs conditioned on learned user preferences.
+      </p>
+      <div class="video-wrapper">
+        <video controls preload="metadata">
+          <source src="videos/Casper_demo_1080p.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================= -->
+  <!-- METHOD -->
+  <!-- ============================================================= -->
+  <section id="method">
+    <div class="container">
+      <div class="section-header">
+        <span class="label">Method</span>
+        <h2>CASPER Pipeline</h2>
+      </div>
+      <p>
+        CASPER treats safety as a relational property of the command and scene rather than an
+        intrinsic property of either in isolation. Given a command <em>c</em> and scene context
+        <em>x = (E<sub>x</sub>, R<sub>x</sub>)</em>, the system constructs an interaction graph
+        <em>G(c, x) = (V, E)</em> and reasons over four cascading modules to produce safe,
+        preference-aligned repairs.
+      </p>
+
+      <figure class="pipeline-figure">
+        <img src="fig_casper_concept4.png" alt="CASPER Pipeline Overview">
+        <figcaption>
+          Figure 1. CASPER integrates four modules: defect diagnosis, repair generation,
+          repair validation and safe-set construction, and preference-based selection.
+        </figcaption>
+      </figure>
+
+      <div class="method-steps-expanded">
+        <div class="step-card-expanded">
+          <div class="step-number">1</div>
+          <h3>Defect Diagnosis</h3>
+          <p>
+            Constructs an interaction graph <em>G(c, x)</em> and evaluates the command across
+            six STAMP/STPA-inspired safety dimensions, returning severity assessments and causal
+            rationales for each flagged hazard.
+          </p>
+        </div>
+        <div class="step-card-expanded">
+          <div class="step-number">2</div>
+          <h3>Repair Generation</h3>
+          <p>
+            Generates diverse repair candidates in parallel using six operator-conditioned strategies,
+            each producing a structured repair with command, action plan, required skills, and expected end state.
+          </p>
+        </div>
+        <div class="step-card-expanded">
+          <div class="step-number">3</div>
+          <h3>Repair Validation &amp; Safe-Set Construction</h3>
+          <p>
+            Filters candidates through a three-gate waterfall &mdash; deterministic plan lint, LLM safety
+            screen, and full 6-dimension re-evaluation &mdash; admitting only validated repairs into the
+            safe set <em>Z<sup>+</sup>(c, x)</em>.
+          </p>
+        </div>
+        <div class="step-card-expanded">
+          <div class="step-number">4</div>
+          <h3>Preference-Based Selection</h3>
+          <p>
+            Scores safe candidates via a Gaussian posterior over 10-dimensional repair features,
+            balancing personalization, safety margin, and exploration through pairwise preference updates.
+          </p>
+        </div>
+      </div>
+
+
+
+    </div>
+  </section>
+
+  <!-- ============================================================= -->
+  <!-- PREFERENCE LEARNING — REAL-WORLD DEMOS -->
+  <!-- ============================================================= -->
+  <section id="preference" class="band">
+    <div class="container">
+      <div class="section-header">
+        <span class="label">Preference Learning</span>
+        <h2>Oracle Preference Profiles &mdash; Real-World Robot Demonstrations</h2>
+      </div>
+      <p>
+        We evaluate preference learning using seven oracle profiles, each representing a distinct
+        repair philosophy. Given a defective command, CASPER detects safety violations and constructs
+        a validated set of safe repairs. Each preference profile then selects a repair from this
+        shared safe set according to its learned repair preferences. The videos below demonstrate
+        these profile-specific repair choices executed by a Franka Research 3 robot across four
+        task-repair categories.
+      </p>
+
+      <div class="profile-legend" aria-label="The seven oracle preference profiles">
+        <div class="legend-card profile-cp">
+          <div class="legend-name"><span class="legend-dot"></span>Conservative Parent</div>
+          <p class="legend-desc">Favors high safety margin and object preservation &mdash; protective interventions even when less disruptive options exist.</p>
+        </div>
+        <div class="legend-card profile-mc">
+          <div class="legend-name"><span class="legend-dot"></span>Minimal Change</div>
+          <p class="legend-desc">Prefers the least disruptive safe repair, preserving the original task as closely as possible.</p>
+        </div>
+        <div class="legend-card profile-oa">
+          <div class="legend-name"><span class="legend-dot"></span>Object-Attached</div>
+          <p class="legend-desc">Strongly prioritizes keeping the original objects in the task, tolerating other changes to preserve object identity.</p>
+        </div>
+        <div class="legend-card profile-p">
+          <div class="legend-name"><span class="legend-dot"></span>Pragmatic</div>
+          <p class="legend-desc">Near-uniform, low-magnitude preferences. Accepts any reasonable safe repair without strong bias.</p>
+        </div>
+        <div class="legend-card profile-sf">
+          <div class="legend-name"><span class="legend-dot"></span>Safety-First</div>
+          <p class="legend-desc">Prioritizes robustness within the safe set, favoring repairs with the highest safety margin.</p>
+        </div>
+        <div class="legend-card profile-sp">
+          <div class="legend-name"><span class="legend-dot"></span>Structure-Preserving</div>
+          <p class="legend-desc">Values preserving the task structure and form over individual object or parameter preservation.</p>
+        </div>
+        <div class="legend-card profile-ap">
+          <div class="legend-name"><span class="legend-dot"></span>Anti-Prior</div>
+          <p class="legend-desc">Preferences intentionally opposite to the population prior &mdash; tests recovery from misaligned initialization.</p>
+        </div>
+      </div>
+
+      <article class="scenario">
+        <header class="scenario-header"><span class="scenario-code">01</span><h3 class="scenario-title">Underspecification Reasoning</h3></header>
+        <div class="stage-head"><span class="stage-title">Task Command:</span></div>
+        <div class="command-block is-defective">
+          <div class="command-text">&ldquo;Place all the fruits and edible items in the black&rdquo;</div>
+        </div>
+        <div class="scenario-info">
+          <div class="info-row violation-row">
+            <span class="info-label violation">Violation(s):</span><span class="info-text">No item in the scene matches with the reference black.</span>
+            <div class="info-row-inline"><span class="triggers-label">Safety Triggers:</span><span class="hazard-chip">D6 &middot; Normative Violation</span></div>
+          </div>
+          <div class="info-row repair-row"><span class="info-label repair">Repair(s):</span><span class="info-text">4 validated safe repairs. The seven profiles chose 3 distinct repairs from the 4 &mdash; each shown below.</span></div>
+        </div>
+        <div class="video-grid">
+          <figure class="video-card"><div class="video-frame"><video controls preload="metadata"><source src="videos/scenarios/U_cp_oa_p_sf.mp4" type="video/mp4"></video></div><figcaption class="video-meta"><div class="command-block is-safe"><span class="command-label">Repair 1:</span><div class="command-text">&ldquo;Place all the fruits and edible items on the RedPlate&rdquo;</div></div><div class="chip-row"><span class="meta-micro">Preferred by</span><div class="chips"><span class="chip profile-cp">Conservative Parent</span><span class="chip profile-oa">Object-Attached</span><span class="chip profile-p">Pragmatic</span><span class="chip profile-sf">Safety-First</span></div></div><div class="op-row"><span class="meta-micro">Repair operator</span><span class="op-tag">Recipient Change</span></div></figcaption></figure>
+          <figure class="video-card"><div class="video-frame"><video controls preload="metadata"><source src="videos/scenarios/U_mc_sp.mp4" type="video/mp4"></video></div><figcaption class="video-meta"><div class="command-block is-safe"><span class="command-label">Repair 2:</span><div class="command-text">&ldquo;Place all the fruits and edible items in the BlackBowl&rdquo;</div></div><div class="chip-row"><span class="meta-micro">Preferred by</span><div class="chips"><span class="chip profile-mc">Minimal Change</span><span class="chip profile-sp">Structure-Preserving</span></div></div><div class="op-row"><span class="meta-micro">Repair operator</span><span class="op-tag">Recipient Change</span></div></figcaption></figure>
+          <figure class="video-card"><div class="video-frame"><video controls preload="metadata"><source src="videos/scenarios/U_ap.mp4" type="video/mp4"></video></div><figcaption class="video-meta"><div class="command-block is-safe"><span class="command-label">Repair 3:</span><div class="command-text">&ldquo;Separate fruits and edible items: fruits in the RedPlate and edibles in the BlackBowl&rdquo;</div></div><div class="chip-row"><span class="meta-micro">Preferred by</span><div class="chips"><span class="chip profile-ap">Anti-Prior</span></div></div><div class="op-row"><span class="meta-micro">Repair operator</span><span class="op-tag">Constraint Tighten</span></div></figcaption></figure>
+        </div>
+      </article>
+
+      <article class="scenario">
+        <header class="scenario-header"><span class="scenario-code">02</span><h3 class="scenario-title">Robot Skill Reasoning</h3></header>
+        <div class="stage-head"><span class="stage-title">Task Command:</span></div>
+        <div class="command-block is-defective">
+          <div class="command-text">&ldquo;Slice the banana and place the content in the red plate&rdquo;</div>
+        </div>
+        <div class="scenario-info">
+          <div class="info-row violation-row">
+            <span class="info-label violation">Violation(s):</span><span class="info-text">FR3 robot does not possess a slicing skill primitive.</span>
+            <div class="info-row-inline"><span class="triggers-label">Safety Triggers:</span><span class="hazard-chip">D6 &middot; Normative Violation</span></div>
+          </div>
+          <div class="info-row repair-row"><span class="info-label repair">Repair(s):</span><span class="info-text">4 validated safe repairs. The seven profiles chose 2 distinct repairs from the 4 &mdash; each shown below.</span></div>
+        </div>
+        <div class="video-grid">
+          <figure class="video-card"><div class="video-frame"><video controls preload="metadata"><source src="videos/scenarios/SR_cp_mc_oa_p_sf_sp.mp4" type="video/mp4"></video></div><figcaption class="video-meta"><div class="command-block is-safe"><span class="command-label">Repair 1:</span><div class="command-text">&ldquo;Place the whole banana in the red plate&rdquo;</div></div><div class="chip-row"><span class="meta-micro">Preferred by</span><div class="chips"><span class="chip profile-cp">Conservative Parent</span><span class="chip profile-mc">Minimal Change</span><span class="chip profile-oa">Object-Attached</span><span class="chip profile-p">Pragmatic</span><span class="chip profile-sf">Safety-First</span><span class="chip profile-sp">Structure-Preserving</span></div></div><div class="op-row"><span class="meta-micro">Repair operator</span><span class="op-tag">Constraint Tighten</span></div></figcaption></figure>
+          <figure class="video-card"><div class="video-frame"><video controls preload="metadata"><source src="videos/scenarios/SR_ap.mp4" type="video/mp4"></video></div><figcaption class="video-meta"><div class="command-block is-safe"><span class="command-label">Repair 2:</span><div class="command-text">&ldquo;Move the banana to the blue bowl&rdquo;</div></div><div class="chip-row"><span class="meta-micro">Preferred by</span><div class="chips"><span class="chip profile-ap">Anti-Prior</span></div></div><div class="op-row"><span class="meta-micro">Repair operator</span><span class="op-tag">Separation</span></div></figcaption></figure>
+        </div>
+      </article>
+
+      <article class="scenario">
+        <header class="scenario-header"><span class="scenario-code">03</span><h3 class="scenario-title">Infeasible Task Reasoning</h3></header>
+        <div class="stage-head"><span class="stage-title">Task Command:</span></div>
+        <div class="command-block is-defective">
+          <div class="command-text">&ldquo;Put all the non-edible items inside the red cup&rdquo;</div>
+        </div>
+        <div class="scenario-info">
+          <div class="info-row violation-row">
+            <span class="info-label violation">Violation(s):</span><span class="info-text">Multiple non-edible items cannot physically fit inside a small cup.</span>
+            <div class="info-row-inline"><span class="triggers-label">Safety Triggers:</span><span class="hazard-chip">D6 &middot; Normative Violation</span></div>
+          </div>
+          <div class="info-row repair-row"><span class="info-label repair">Repair(s):</span><span class="info-text">8 validated safe repairs. The seven profiles chose 2 distinct repairs from the 8 &mdash; each shown below.</span></div>
+        </div>
+        <div class="video-grid">
+          <figure class="video-card"><div class="video-frame"><video controls preload="metadata"><source src="videos/scenarios/I_cp_mc_oa_p_sf_sp.mp4" type="video/mp4"></video></div><figcaption class="video-meta"><div class="command-block is-safe"><span class="command-label">Repair 1:</span><div class="command-text">&ldquo;Put all the non-edible items inside the black bowl&rdquo;</div></div><div class="chip-row"><span class="meta-micro">Preferred by</span><div class="chips"><span class="chip profile-cp">Conservative Parent</span><span class="chip profile-mc">Minimal Change</span><span class="chip profile-oa">Object-Attached</span><span class="chip profile-p">Pragmatic</span><span class="chip profile-sf">Safety-First</span><span class="chip profile-sp">Structure-Preserving</span></div></div><div class="op-row"><span class="meta-micro">Repair operator</span><span class="op-tag">Barrier</span></div></figcaption></figure>
+          <figure class="video-card"><div class="video-frame"><video controls preload="metadata"><source src="videos/scenarios/I_ap.mp4" type="video/mp4"></video></div><figcaption class="video-meta"><div class="command-block is-safe"><span class="command-label">Repair 2:</span><div class="command-text">&ldquo;Put the plastic fork and remote control inside the RedPlate, and the sponge and towel inside the BlackBowl&rdquo;</div></div><div class="chip-row"><span class="meta-micro">Preferred by</span><div class="chips"><span class="chip profile-ap">Anti-Prior</span></div></div><div class="op-row"><span class="meta-micro">Repair operator</span><span class="op-tag">Constraint Tighten</span></div></figcaption></figure>
+        </div>
+      </article>
+
+      <article class="scenario">
+        <header class="scenario-header"><span class="scenario-code">04</span><h3 class="scenario-title">Defective Task Reasoning (Co-containment)</h3></header>
+        <div class="stage-head"><span class="stage-title">Task Command:</span></div>
+        <div class="command-block is-defective">
+          <div class="command-text">&ldquo;Place the remote control, pear, and apple in the blackbowl&rdquo;</div>
+        </div>
+        <div class="scenario-info">
+          <div class="info-row violation-row">
+            <span class="info-label violation">Violation(s):</span><span class="info-text">Remote control co-contained with food items in a shared container.</span>
+            <div class="info-row-inline"><span class="triggers-label">Safety Triggers:</span><span class="hazard-chip">D5 &middot; Value / Property</span><span class="hazard-chip">D6 &middot; Normative Violation</span></div>
+          </div>
+          <div class="info-row repair-row"><span class="info-label repair">Repair(s):</span><span class="info-text">6 validated safe repairs. The seven profiles chose 3 distinct repairs from the 6 &mdash; each shown below.</span></div>
+        </div>
+        <div class="video-grid">
+          <figure class="video-card"><div class="video-frame"><video controls preload="metadata"><source src="videos/scenarios/D_ap.mp4" type="video/mp4"></video></div><figcaption class="video-meta"><div class="command-block is-safe"><span class="command-label">Repair 1:</span><div class="command-text">&ldquo;Place the remote control in the blackbowl, the apple and the pear on the redplate&rdquo;</div></div><div class="chip-row"><span class="meta-micro">Preferred by</span><div class="chips"><span class="chip profile-ap">Anti-Prior</span></div></div><div class="op-row"><span class="meta-micro">Repair operator</span><span class="op-tag">Separation</span></div></figcaption></figure>
+          <figure class="video-card"><div class="video-frame"><span class="video-overlay-note">These profiles chose the repair option that kept the items in the same receptacle, but spaced them apart to avoid contact.</span><video controls preload="metadata"><source src="videos/scenarios/D_cp_oa_p.mp4" type="video/mp4"></video></div><figcaption class="video-meta"><div class="command-block is-safe"><span class="command-label">Repair 2:</span><div class="command-text">&ldquo;Place the remote control, apple, and pear in the RedPlate&rdquo;</div></div><div class="chip-row"><span class="meta-micro">Preferred by</span><div class="chips"><span class="chip profile-cp">Conservative Parent</span><span class="chip profile-oa">Object-Attached</span><span class="chip profile-p">Pragmatic</span></div></div><div class="op-row"><span class="meta-micro">Repair operator</span><span class="op-tag">Constraint Tighten</span></div></figcaption></figure>
+          <figure class="video-card"><div class="video-frame"><span class="video-overlay-note">Given that the safety severity of the original command was low, these profiles chose to stay close to the original command.</span><video controls preload="metadata"><source src="videos/scenarios/D_mc_sf_sp.mp4" type="video/mp4"></video></div><figcaption class="video-meta"><div class="command-block is-safe"><span class="command-label">Repair 3:</span><div class="command-text">&ldquo;Place the remote control, pear, and apple in the blackbowl&rdquo;</div></div><div class="chip-row"><span class="meta-micro">Preferred by</span><div class="chips"><span class="chip profile-mc">Minimal Change</span><span class="chip profile-sf">Safety-First</span><span class="chip profile-sp">Structure-Preserving</span></div></div><div class="op-row"><span class="meta-micro">Repair operator</span><span class="op-tag">Accept Original</span></div></figcaption></figure>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============================================================= -->
+  <!-- RESULTS -->
+  <!-- ============================================================= -->
+  <section id="results">
+    <div class="container">
+      <div class="section-header">
+        <span class="label">Results</span>
+        <h2>Evaluation Results</h2>
+      </div>
+
+      <!-- Experiment A: Benchmarks -->
+      <h3 class="subsection-heading">A. Safety Detection &amp; Repair (SafeAgentBench + EARBench)</h3>
+      <p>
+        300-command evaluation on SafeAgentBench (150 unsafe, 150 safe) and 531-task
+        generalization on EARBench (home split). Compared against SafePlan and RoboGuard baselines.
+      </p>
+      <div class="results-table-wrapper">
+        <table class="results-table">
+          <thead>
+            <tr><th></th><th>CASPER</th><th>SafePlan</th><th>RoboGuard</th></tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="4" class="group-header">SafeAgentBench &mdash; Hazard Detection</td></tr>
+            <tr><td>Recall (%)</td><td><strong class="highlight">96.0</strong></td><td>80.0</td><td>34.0</td></tr>
+            <tr><td>Precision (%)</td><td><strong class="highlight">85.7</strong></td><td>83.3</td><td>71.8</td></tr>
+            <tr><td>F1 (%)</td><td><strong class="highlight">90.6</strong></td><td>81.6</td><td>46.2</td></tr>
+            <tr><td>FP Rate (%)</td><td>16.0</td><td>16.0</td><td><strong class="highlight">13.3</strong></td></tr>
+            <tr><td>Accuracy (%)</td><td><strong class="highlight">90.0</strong></td><td>82.0</td><td>60.3</td></tr>
+            <tr><td colspan="4" class="group-header">SafeAgentBench &mdash; Repair Pipeline</td></tr>
+            <tr><td>Unsafe Scenarios</td><td>150</td><td>&mdash;</td><td>&mdash;</td></tr>
+            <tr><td>Total Validated Repairs</td><td><strong class="highlight">578</strong></td><td>&mdash;</td><td>&mdash;</td></tr>
+            <tr><td>Avg. Repairs / Unsafe Task</td><td><strong class="highlight">3.9</strong></td><td>&mdash;</td><td>&mdash;</td></tr>
+            <tr><td colspan="4" class="group-header">EARBench &mdash; Cross-Domain Generalization (531 tasks)</td></tr>
+            <tr><td>Detection Rate (%)</td><td><strong class="highlight">89.5</strong></td><td>73.1</td><td>49.7</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- EARBench per-environment -->
+      <p style="font-size: 0.85rem; margin-top: 0.5rem;">EARBench detection by environment:</p>
+      <div class="results-table-wrapper">
+        <table class="results-table">
+          <thead>
+            <tr><th>Environment</th><th>Tasks</th><th>CASPER</th><th>SafePlan</th><th>RoboGuard</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Living Room</td><td>107</td><td><strong class="highlight">93.5%</strong></td><td>67.3%</td><td>42.1%</td></tr>
+            <tr><td>Bedroom</td><td>44</td><td><strong class="highlight">93.2%</strong></td><td>81.8%</td><td>52.3%</td></tr>
+            <tr><td>Kitchen</td><td>223</td><td><strong class="highlight">89.7%</strong></td><td>75.3%</td><td>42.2%</td></tr>
+            <tr><td>Bathroom</td><td>121</td><td><strong class="highlight">87.6%</strong></td><td>78.5%</td><td>71.1%</td></tr>
+            <tr><td>Study Room</td><td>36</td><td><strong class="highlight">77.8%</strong></td><td>47.2%</td><td>44.4%</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Three-Gate Validation -->
+      <h3 class="subsection-heading">Three-Gate Validation Statistics</h3>
+      <p>
+        Aggregate gate-wise filtering across 144 detected-unsafe tasks (985 candidates generated).
+      </p>
+      <div class="results-table-wrapper">
+        <table class="results-table">
+          <thead>
+            <tr><th>Stage</th><th>Checks</th><th>Rejected</th><th>% of Generated</th><th>Remaining</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Generated</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>985</td></tr>
+            <tr><td>Gate 1: Plan Lint</td><td>Valid actions, grounded objects</td><td>259</td><td>26.3%</td><td>726</td></tr>
+            <tr><td>Gate 2: Safety Screen</td><td>Hazard resolution</td><td>103</td><td>10.5%</td><td>623</td></tr>
+            <tr><td>Gate 3: Full Safety Eval</td><td>6-dimension assessment</td><td>45</td><td>4.6%</td><td>578</td></tr>
+            <tr><td><strong>Final Safe Set</strong></td><td>All three gates passed</td><td>&mdash;</td><td>&mdash;</td><td><strong class="highlight">578 (58.7%)</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Experiment B: Online Preference Learning -->
+      <h3 class="subsection-heading">B. Online Preference Learning (7 profiles &times; 20 trials, T=30)</h3>
+      <p>
+        Per-profile preference learning against four baselines. Bold indicates best accuracy
+        and lowest regret per profile.
+      </p>
+      <div class="results-table-wrapper">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>Profile</th>
+              <th colspan="2">CASPER</th>
+              <th colspan="2">Greedy</th>
+              <th colspan="2">Thompson</th>
+              <th colspan="2">Random</th>
+              <th colspan="2">Safety MM</th>
+            </tr>
+            <tr>
+              <th></th>
+              <th>Acc</th><th>Reg&darr;</th>
+              <th>Acc</th><th>Reg&darr;</th>
+              <th>Acc</th><th>Reg&darr;</th>
+              <th>Acc</th><th>Reg&darr;</th>
+              <th>Acc</th><th>Reg&darr;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Anti-Prior</td><td><strong class="highlight">72.8</strong></td><td><strong class="highlight">3.42</strong></td><td>56.2</td><td>5.69</td><td>56.2</td><td>5.19</td><td>55.5</td><td>4.47</td><td>54.1</td><td>3.82</td></tr>
+            <tr><td>Safety-First</td><td><strong class="highlight">88.1</strong></td><td>1.32</td><td>75.2</td><td><strong class="highlight">1.03</strong></td><td>74.2</td><td>2.00</td><td>77.1</td><td>2.97</td><td>71.1</td><td>3.05</td></tr>
+            <tr><td>Structure-Pres.</td><td><strong class="highlight">90.3</strong></td><td>1.73</td><td>88.0</td><td><strong class="highlight">1.55</strong></td><td>86.3</td><td>4.27</td><td>83.8</td><td>8.87</td><td>83.6</td><td>9.51</td></tr>
+            <tr><td>Minimal Change</td><td>88.0</td><td>2.06</td><td>86.9</td><td><strong class="highlight">1.54</strong></td><td>87.4</td><td>4.64</td><td><strong class="highlight">87.7</strong></td><td>8.24</td><td>81.5</td><td>9.93</td></tr>
+            <tr><td>Conservative</td><td>86.4</td><td>1.78</td><td><strong class="highlight">91.3</strong></td><td><strong class="highlight">1.11</strong></td><td>90.5</td><td>3.35</td><td>88.7</td><td>5.04</td><td>89.4</td><td>5.26</td></tr>
+            <tr><td>Object-Attached</td><td>82.6</td><td><strong class="highlight">1.19</strong></td><td><strong class="highlight">87.1</strong></td><td>1.31</td><td>86.4</td><td>2.74</td><td>85.7</td><td>5.21</td><td>86.3</td><td>3.55</td></tr>
+            <tr><td>Pragmatic</td><td>69.6</td><td>0.84</td><td><strong class="highlight">70.3</strong></td><td><strong class="highlight">0.74</strong></td><td>67.4</td><td>1.12</td><td>67.9</td><td>1.26</td><td>67.9</td><td>0.73</td></tr>
+            <tr><td colspan="11" class="group-header">Aggregate</td></tr>
+            <tr><td><strong>Aggregate</strong></td><td><strong class="highlight">82.5</strong></td><td><strong class="highlight">1.76</strong></td><td>79.3</td><td>1.85</td><td>78.3</td><td>3.33</td><td>78.1</td><td>5.15</td><td>76.3</td><td>5.12</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Aggregate with posterior diagnostics -->
+      <p style="font-size: 0.85rem; margin-top: 0.5rem;">Aggregate with posterior diagnostics:</p>
+      <div class="results-table-wrapper">
+        <table class="results-table">
+          <thead>
+            <tr><th>Strategy</th><th>Accuracy (%)</th><th>Regret &darr;</th><th>Contraction &darr;</th><th>Conv. Rate</th><th>Conv. Time</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong class="highlight">CASPER</strong></td><td><strong class="highlight">82.5</strong></td><td><strong class="highlight">1.76</strong></td><td><strong class="highlight">0.847</strong></td><td><strong class="highlight">31.4%</strong></td><td>12.3</td></tr>
+            <tr><td>Greedy</td><td>79.3</td><td>1.85</td><td>0.902</td><td>29.3%</td><td>13.2</td></tr>
+            <tr><td>Thompson Sampling</td><td>78.3</td><td>3.33</td><td>0.906</td><td>25.0%</td><td>14.3</td></tr>
+            <tr><td>Random</td><td>78.1</td><td>5.15</td><td>0.889</td><td>25.7%</td><td><strong class="highlight">11.9</strong></td></tr>
+            <tr><td>Safety Max-Margin</td><td>76.3</td><td>5.12</td><td>0.922</td><td>22.1%</td><td>12.1</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Experiment C: Cross-Hazard Transfer -->
+      <h3 class="subsection-heading">C. Cross-Hazard Transfer (Leave-Two-Categories-Out)</h3>
+      <p>
+        Strategy-level repair features versus text features (TF-IDF) on held-out hazard categories.
+        Strategy features produce substantially lower test regret (2.1&times; advantage).
+      </p>
+      <div class="results-table-wrapper">
+        <table class="results-table">
+          <thead>
+            <tr><th>Representation</th><th>Train Acc.</th><th>Test Acc.</th><th>Train Regret</th><th>Test Regret</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong class="highlight">Strategy features</strong></td><td>81.4%</td><td><strong class="highlight">79.9%</strong></td><td><strong class="highlight">1.73</strong></td><td><strong class="highlight">1.10</strong></td></tr>
+            <tr><td>Text features</td><td>79.5%</td><td>79.6%</td><td>2.74</td><td>2.33</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Experiment D: FR3 Robot -->
+      <h3 class="subsection-heading">D. Real-World Franka Research 3 Robot (12 Scenarios)</h3>
+      <p>
+        Real-world evaluation with VLM-grounded scenes across four command families.
+        Each command passes through the full pipeline with profile-conditioned repair selection.
+      </p>
+      <div class="results-table-wrapper">
+        <table class="results-table">
+          <thead>
+            <tr><th>Category</th><th>N</th><th>Detection</th><th>Avg. Safe</th><th>Exec. Success</th><th>Abort Rate</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Defective Task Specification</td><td>3</td><td>100%</td><td>5</td><td>3/3</td><td>0/3</td></tr>
+            <tr><td>Infeasible Task</td><td>3</td><td>100%</td><td>4</td><td>2/3</td><td>0/3</td></tr>
+            <tr><td>Robot Skill Reasoning</td><td>3</td><td>100%</td><td>5</td><td>2/3</td><td>0/3</td></tr>
+            <tr><td>Underspecification</td><td>3</td><td>100%</td><td>5</td><td>2/3</td><td>0/3</td></tr>
+            <tr><td colspan="6" class="group-header">Aggregate</td></tr>
+            <tr><td><strong>Overall</strong></td><td>12</td><td><strong class="highlight">100%</strong></td><td><strong class="highlight">4.75</strong></td><td><strong class="highlight">9/12 (75%)</strong></td><td><strong class="highlight">0/12 (0%)</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Ablation -->
+      <h3 class="subsection-heading">E. Ablation Study</h3>
+      <p>
+        Four targeted ablations isolating contributions of each preference learning component.
+        The Anti-Prior profile shows the strongest evidence for user-specific adaptation (13.6pp gap).
+      </p>
+      <div class="results-table-wrapper">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>Profile</th>
+              <th colspan="2">Full CASPER</th>
+              <th colspan="2">No Personal.</th>
+              <th colspan="2">No Safety M.</th>
+              <th colspan="2">No Info Gain</th>
+            </tr>
+            <tr>
+              <th></th>
+              <th>Acc</th><th>Reg&darr;</th>
+              <th>Acc</th><th>Reg&darr;</th>
+              <th>Acc</th><th>Reg&darr;</th>
+              <th>Acc</th><th>Reg&darr;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Anti-Prior</td><td><strong class="highlight">72.8</strong></td><td><strong class="highlight">3.42</strong></td><td>59.2</td><td>7.47</td><td>56.6</td><td>5.02</td><td>55.2</td><td>6.33</td></tr>
+            <tr><td>Safety-First</td><td>88.1</td><td>1.32</td><td>86.4</td><td>1.28</td><td><strong class="highlight">90.1</strong></td><td><strong class="highlight">1.10</strong></td><td>88.4</td><td>1.15</td></tr>
+            <tr><td>Structure-Pres.</td><td>90.3</td><td>1.73</td><td><strong class="highlight">91.5</strong></td><td>2.74</td><td>92.0</td><td><strong class="highlight">1.69</strong></td><td>88.7</td><td>1.51</td></tr>
+            <tr><td>Minimal Change</td><td>88.0</td><td>2.06</td><td>87.2</td><td>3.29</td><td><strong class="highlight">90.7</strong></td><td>2.23</td><td>90.2</td><td><strong class="highlight">1.68</strong></td></tr>
+            <tr><td>Conservative</td><td><strong class="highlight">86.4</strong></td><td>1.78</td><td>85.9</td><td>1.85</td><td>86.8</td><td>1.74</td><td>85.7</td><td><strong class="highlight">1.44</strong></td></tr>
+            <tr><td>Object-Attached</td><td>82.6</td><td><strong class="highlight">1.19</strong></td><td>84.0</td><td>1.46</td><td><strong class="highlight">84.9</strong></td><td>1.45</td><td>84.0</td><td>1.13</td></tr>
+            <tr><td>Pragmatic</td><td>69.6</td><td>0.84</td><td>70.6</td><td><strong class="highlight">0.54</strong></td><td><strong class="highlight">72.5</strong></td><td>0.64</td><td>69.4</td><td>0.77</td></tr>
+            <tr><td colspan="9" class="group-header">Aggregate</td></tr>
+            <tr><td><strong>Aggregate</strong></td><td><strong class="highlight">82.5</strong></td><td><strong class="highlight">1.76</strong></td><td>80.7</td><td>2.66</td><td>81.9</td><td>1.98</td><td>80.2</td><td>2.00</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================= -->
+  <!-- QUALITATIVE MECHANISTIC ANALYSIS -->
+  <!-- ============================================================= -->
+  <section id="analysis" class="band">
+    <div class="container">
+      <div class="section-header">
+        <span class="label">Analysis</span>
+        <h2>Qualitative Mechanistic Analysis</h2>
+      </div>
+      <p>
+        We employ two distinct cases below to illustrate how CASPER leverages an interaction graph
+        for safety diagnosis and repair. Each case below shows the interaction graph of a
+        defective command with the graphs of its repaired alternatives.
+        <em>Click any graph to enlarge.</em>
+      </p>
+
+      <!-- Case 1: Defective Task Reasoning -->
+      <article class="scenario case-study">
+        <header class="scenario-header"><span class="scenario-code">01</span><h3 class="scenario-title">Defective Task Reasoning (Contamination)</h3></header>
+        <div class="stage-head"><span class="stage-title">Task Command:</span></div>
+        <div class="command-block is-defective">
+          <div class="command-text">&ldquo;Place the sponge, pear, and apple in the blackbowl&rdquo;</div>
+        </div>
+        <div class="scenario-info">
+          <div class="info-row violation-row">
+            <span class="info-label violation">Violation(s):</span><span class="info-text">Cleaning item co-placed with food in a shared container.</span>
+            <div class="info-row-inline"><span class="triggers-label">Safety Triggers:</span><span class="hazard-chip">D5 &middot; Value / Property</span><span class="hazard-chip">D6 &middot; Normative Violation</span></div>
+          </div>
+        </div>
+        <div class="case-study-grid">
+          <figure class="graph-card is-defective" onclick="openLightbox(this)">
+            <div class="graph-well"><img src="assets/images/mechanistic/slide_01.png" alt="Defective: sponge interaction graph" loading="lazy"></div>
+            <div class="graph-label"><span class="graph-type defective">Defective</span><span class="graph-title">Description</span><div class="graph-desc">The interaction graph reveals that placing a sponge alongside food items in the same bowl creates CONTAINMENT edges that converge on BlackBowl, forming a co-containment zone. This co-containment produces transitive CONTACT edges between the sponge and each food item, which the safety kernel flags as a contamination hazard.</div></div>
+          </figure>
+          <figure class="graph-card" onclick="openLightbox(this)">
+            <div class="graph-well"><img src="assets/images/mechanistic/slide_02.png" alt="Repair: substitution" loading="lazy"></div>
+            <div class="graph-label"><span class="graph-type repair">Repair 1</span><span class="graph-title">Description</span><div class="graph-desc">This repair substitutes the sponge with a sausage, a food-safe item, while preserving the original co-containment structure in BlackBowl. Because all three items now belong to the same safety category, the CONTACT edges no longer trigger a contamination flag.</div>
+              <div class="chip-row"><span class="meta-micro">Preferred by</span><div class="chips"><span class="chip profile-cp">Conservative Parent</span><span class="chip profile-mc">Minimal Change</span><span class="chip profile-oa">Object-Attached</span><span class="chip profile-p">Pragmatic</span><span class="chip profile-sf">Safety-First</span><span class="chip profile-sp">Structure-Preserving</span></div></div>
+              <div class="op-row"><span class="meta-micro">Repair operator</span><span class="op-tag">Substitution</span></div>
+            </div>
+          </figure>
+          <figure class="graph-card" onclick="openLightbox(this)">
+            <div class="graph-well"><img src="assets/images/mechanistic/slide_03.png" alt="Repair: constraint tighten" loading="lazy"></div>
+            <div class="graph-label"><span class="graph-type repair">Repair 2</span><span class="graph-title">Description</span><div class="graph-desc">This repair disperses the three items into separate containers: Pear remains in BlackBowl, Apple goes to RedPlate, and Sponge is placed on the Towel. By breaking the co-containment structure entirely, no CONTACT edges form between the sponge and the food items.</div>
+              <div class="chip-row"><span class="meta-micro">Preferred by</span><div class="chips"><span class="chip profile-ap">Anti-Prior</span></div></div>
+              <div class="op-row"><span class="meta-micro">Repair operator</span><span class="op-tag">Constraint Tighten</span></div>
+            </div>
+          </figure>
+        </div>
+      </article>
+
+      <!-- Case 2: Underspecification Reasoning -->
+      <article class="scenario case-study">
+        <header class="scenario-header"><span class="scenario-code">02</span><h3 class="scenario-title">Underspecification Reasoning</h3></header>
+        <div class="stage-head"><span class="stage-title">Task Command:</span></div>
+        <div class="command-block is-defective">
+          <div class="command-text">&ldquo;Place all the fruits and edible items in the black&rdquo;</div>
+        </div>
+        <div class="scenario-info">
+          <div class="info-row violation-row">
+            <span class="info-label violation">Violation(s):</span><span class="info-text">Truncated destination &ldquo;the black&rdquo; cannot be resolved to a scene entity.</span>
+            <div class="info-row-inline"><span class="triggers-label">Safety Triggers:</span><span class="hazard-chip">D6 &middot; Normative Violation</span></div>
+          </div>
+        </div>
+        <div class="case-study-grid cols-4">
+          <figure class="graph-card is-defective" onclick="openLightbox(this)">
+            <div class="graph-well"><img src="assets/images/mechanistic/slide_04.png" alt="Defective: underspecification graph" loading="lazy"></div>
+            <div class="graph-label"><span class="graph-type defective">Defective</span><span class="graph-title">Description</span><div class="graph-desc">The command references &ldquo;the black&rdquo; as the destination, which cannot be resolved to any concrete object in the scene. All five edible items (Pear, Apple, Banana, Carrot, Sausage) have CONTAINMENT edges targeting this unresolvable reference, blocking execution entirely.</div></div>
+          </figure>
+          <figure class="graph-card" onclick="openLightbox(this)">
+            <div class="graph-well"><img src="assets/images/mechanistic/slide_05.png" alt="Repair: resolve to RedPlate" loading="lazy"></div>
+            <div class="graph-label"><span class="graph-type repair">Repair 1</span><span class="graph-title">Description</span><div class="graph-desc">This repair resolves the ambiguous reference by selecting RedPlate, the largest available surface in the scene, as the destination for all five items. The CONTAINMENT edges now converge on a concrete, grounded node, making the action plan executable.</div>
+              <div class="chip-row"><span class="meta-micro">Preferred by</span><div class="chips"><span class="chip profile-cp">Conservative Parent</span><span class="chip profile-oa">Object-Attached</span><span class="chip profile-p">Pragmatic</span><span class="chip profile-sf">Safety-First</span></div></div>
+              <div class="op-row"><span class="meta-micro">Repair operator</span><span class="op-tag">Recipient Change</span></div>
+            </div>
+          </figure>
+          <figure class="graph-card" onclick="openLightbox(this)">
+            <div class="graph-well"><img src="assets/images/mechanistic/slide_06.png" alt="Repair: resolve to BlackBowl" loading="lazy"></div>
+            <div class="graph-label"><span class="graph-type repair">Repair 2</span><span class="graph-title">Description</span><div class="graph-desc">This repair interprets &ldquo;the black&rdquo; as BlackBowl, the closest lexical match among scene entities, and routes all five items there. The graph structure mirrors the original command&rsquo;s intent with minimal deviation, differing only in that the destination node is now concretely grounded.</div>
+              <div class="chip-row"><span class="meta-micro">Preferred by</span><div class="chips"><span class="chip profile-mc">Minimal Change</span><span class="chip profile-sp">Structure-Preserving</span></div></div>
+              <div class="op-row"><span class="meta-micro">Repair operator</span><span class="op-tag">Recipient Change</span></div>
+            </div>
+          </figure>
+          <figure class="graph-card" onclick="openLightbox(this)">
+            <div class="graph-well"><img src="assets/images/mechanistic/slide_07.png" alt="Repair: split across containers" loading="lazy"></div>
+            <div class="graph-label"><span class="graph-type repair">Repair 3</span><span class="graph-title">Description</span><div class="graph-desc">Rather than resolving to a single destination, this repair splits the items across two containers: Apple and Banana go to BlackBowl, while Carrot, Pear, and Sausage go to RedPlate. The interaction graph branches into two independent CONTAINMENT subgraphs, each with a concrete destination.</div>
+              <div class="chip-row"><span class="meta-micro">Preferred by</span><div class="chips"><span class="chip profile-ap">Anti-Prior</span></div></div>
+              <div class="op-row"><span class="meta-micro">Repair operator</span><span class="op-tag">Constraint Tighten</span></div>
+            </div>
+          </figure>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============================================================= -->
+  <!-- CITATION -->
+  <!-- ============================================================= -->
+  <section id="citation">
+    <div class="container">
+      <div class="section-header">
+        <span class="label">Citation</span>
+        <h2>BibTeX</h2>
+      </div>
+      <p>If you find this work useful, please cite:</p>
+
+      <div class="citation-block">
+        <button class="copy-btn">Copy</button>
+        <pre class="citation-text">@inproceedings{casper2026,
+  title     = {CASPER: Task Command Repair with Constrained
+               Preference Learning},
+  author    = {Anonymous},
+  booktitle = {Conference on Robot Learning (CoRL)},
+  year      = {2026}
+}</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================= -->
+  <!-- FOOTER -->
+  <!-- ============================================================= -->
+  <footer>
+    <div class="container">
+      <p>
+        CASPER &mdash; Task Command Repair with Constrained Preference Learning
+      </p>
+      <p style="margin-top: 0.5rem; font-size: 0.75rem; opacity: 0.6;">
+        This page is for anonymous peer review purposes. Author information will be added upon acceptance.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+    <img id="lightbox-img" src="" alt="Enlarged graph">
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
