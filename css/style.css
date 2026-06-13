@@ -901,6 +901,12 @@ footer p {
 .cmd-block.is-safe .cmd-label,
 .command-block.is-safe .command-label { color: var(--safe); }
 
+.command-block .command-text {
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 0.5rem;
+}
+
 .hazard-row {
   display: flex;
   flex-wrap: wrap;
