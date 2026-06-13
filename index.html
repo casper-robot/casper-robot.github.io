@@ -44,7 +44,7 @@
       <p>
         Pre-execution safety gates have emerged as the first safety layer for LLM-based robot systems,
         ensuring that only safe task commands proceed to task planning and policy execution.
-        However, current safety gates focus only on accepting or denying commands and do not
+        Despite its benefits, current safety gates focus only on accepting or denying commands and do not
         provide users with opportunity to recover from errors, or adapt to individual users
         over time.
         We present CASPER, a constrained repair framework that transforms recoverable defective robot
@@ -206,7 +206,6 @@
         <div class="scenario-info">
           <div class="info-row violation-row">
             <span class="info-label violation">Violation(s):</span><span class="info-text">No item in the scene matches with the reference black.</span>
-            <div class="info-row-inline"><span class="triggers-label">Safety Triggers:</span><span class="hazard-chip">D6 &middot; Normative Violation</span></div>
           </div>
           <div class="info-row repair-row"><span class="info-label repair">Repair(s):</span><span class="info-text">4 validated safe repairs. The seven profiles chose 3 distinct repairs from the 4 &mdash; each shown below.</span></div>
         </div>
@@ -226,7 +225,6 @@
         <div class="scenario-info">
           <div class="info-row violation-row">
             <span class="info-label violation">Violation(s):</span><span class="info-text">FR3 robot does not possess a slicing skill primitive.</span>
-            <div class="info-row-inline"><span class="triggers-label">Safety Triggers:</span><span class="hazard-chip">D6 &middot; Normative Violation</span></div>
           </div>
           <div class="info-row repair-row"><span class="info-label repair">Repair(s):</span><span class="info-text">4 validated safe repairs. The seven profiles chose 2 distinct repairs from the 4 &mdash; each shown below.</span></div>
         </div>
@@ -245,7 +243,6 @@
         <div class="scenario-info">
           <div class="info-row violation-row">
             <span class="info-label violation">Violation(s):</span><span class="info-text">Multiple non-edible items cannot physically fit inside a small cup.</span>
-            <div class="info-row-inline"><span class="triggers-label">Safety Triggers:</span><span class="hazard-chip">D6 &middot; Normative Violation</span></div>
           </div>
           <div class="info-row repair-row"><span class="info-label repair">Repair(s):</span><span class="info-text">8 validated safe repairs. The seven profiles chose 2 distinct repairs from the 8 &mdash; each shown below.</span></div>
         </div>
@@ -264,7 +261,6 @@
         <div class="scenario-info">
           <div class="info-row violation-row">
             <span class="info-label violation">Violation(s):</span><span class="info-text">Remote control co-contained with food items in a shared container.</span>
-            <div class="info-row-inline"><span class="triggers-label">Safety Triggers:</span><span class="hazard-chip">D5 &middot; Value / Property</span><span class="hazard-chip">D6 &middot; Normative Violation</span></div>
           </div>
           <div class="info-row repair-row"><span class="info-label repair">Repair(s):</span><span class="info-text">6 validated safe repairs. The seven profiles chose 3 distinct repairs from the 6 &mdash; each shown below.</span></div>
         </div>
@@ -502,7 +498,7 @@
         We employ two distinct cases below to illustrate how CASPER leverages an interaction graph
         for safety diagnosis and repair. Each case below shows the interaction graph of a
         defective command with the graphs of its repaired alternatives.
-        <em>Click any graph to enlarge.</em>
+        <strong>Click any graph to enlarge.</strong>
       </p>
 
       <!-- Case 1: Defective Task Reasoning -->
